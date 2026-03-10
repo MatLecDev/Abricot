@@ -1,0 +1,100 @@
+.dashboardTask{
+    border: 1px solid var(--light-gray);
+    border-radius: 10px;
+    padding: 15px 30px;
+    margin-bottom: 20px;
+}
+
+.taskHeader{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    row-gap: 10px;
+}
+
+.taskHeader h3{
+    margin: 0;
+}
+
+.status{
+    padding: 5px 15px;
+    border-radius: 20px;
+    font-size: 16px;
+    width: auto;
+    text-wrap: nowrap;
+}
+
+.TODO{
+    background-color: var(--light-red);
+    color: var(--red);
+}
+
+.IN_PROGRESS{
+    background-color: var(--light-yellow);
+    color: var(--yellow);
+}
+
+.DONE{
+    background-color: var(--light-green);
+    color: var(--green);
+}
+
+.taskContent{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    row-gap: 20px;
+}
+
+.tasksListWrapper .taskContentInfos{
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 5px;
+}
+
+.taskContentInfos span{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-right: 1px solid var(--dark-gray);
+    padding: 0 10px;
+}
+
+.taskContentInfos span:last-child{
+    border-right: none;
+}
+
+.taskContentInfos span p{
+    margin: 0;
+}
+
+.seeTaskBtn{
+    background-color: var(--black);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    width: 125px;
+    height: 50px;
+    font-size: 18px;
+    cursor: pointer;
+}
+
+@media (max-width: 1024px){
+    .kanbanTasks .dashboardTask{
+        min-width: calc(100% - 60px);
+    }
+}
+
+@media (max-width: 800px) {
+    .dashboardTask {
+        padding: 5px 20px;
+    }
+
+    .taskContent{
+        align-items: center;
+    }
+}

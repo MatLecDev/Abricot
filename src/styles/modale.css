@@ -1,0 +1,151 @@
+.modalBackdrop {
+    position: fixed;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.4);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 100;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+.modal {
+    background: white;
+    border-radius: 12px;
+    padding: 32px;
+    width: 100%;
+    max-width: 500px;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    box-sizing: border-box;
+}
+
+.modalClose {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    background: none;
+    border: none;
+    font-size: 18px;
+    cursor: pointer;
+    color: #666;
+}
+
+.modalTitle {
+    font-size: 22px;
+}
+
+.modalForm {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.modalForm label {
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.modalForm input {
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 20px 12px;
+    font-size: 14px;
+    outline: none;
+    margin-bottom: 20px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.modalForm input:focus {
+    border-color: var(--main-orange);
+}
+
+.dropdownToggle {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 20px 12px;
+    background: white;
+    cursor: pointer;
+    font-size: 14px;
+    color: #999;
+}
+
+.modalSubmit{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 20px;
+}
+
+.modalSubmitBtn {
+    padding: 20px 12px;
+    border-radius: 8px;
+    border: none;
+    background-color: #e0e0e0;
+    color: #999;
+    font-size: 14px;
+    cursor: not-allowed;
+    width: 40%;
+}
+
+.modalSubmitActiveBtn {
+    background-color: var(--main-orange);
+    color: white;
+    cursor: pointer;
+}
+
+.statusSelector{
+    margin: 20px 0;
+}
+
+.statusOption {
+    padding: 8px 16px;
+    border-radius: 999px;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+    opacity: 0.6;
+    transition: opacity 0.2s;
+    margin-right: 10px;
+}
+
+.statusOption:last-child{
+    margin-right: 0;
+}
+
+.statusOptionActive {
+    opacity: 1;
+    border: 1px solid;
+}
+
+@media (max-width: 800px){
+    .modal{
+        width: 80%;
+        padding: 20px;
+    }
+
+    .statusSelector{
+        display: flex;
+        flex-wrap: wrap;
+    }
+
+    .modalSubmitBtn{
+        width: 60%;
+    }
+}
+
+@media (max-width: 500px){
+    .modal{
+        width: 90%!important;
+        padding: 15px;
+    }
+}

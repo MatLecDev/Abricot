@@ -1,0 +1,194 @@
+.mainWrapper{
+    padding: 50px 10vw;
+}
+
+.dashboardHeader{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    column-gap: 50px;
+    font-size: 18px;
+    width: 100%;
+}
+
+.dashboardHeader h1{
+    margin-bottom: 0;
+    line-height: 20px;
+    font-size: 24px;
+}
+
+.dashboardHeader button{
+    height: 50px;
+    padding: 0 20px;
+    background: var(--black);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: 18px;
+    cursor: pointer;
+}
+
+.displayOptions{
+    margin-top: 40px;
+    display: flex;
+    gap: 20px;
+}
+
+.option{
+    border: none;
+    border-radius: 10px;
+    color: var(--main-orange);
+    padding: 15px 20px;
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    background: white;
+    cursor: pointer;
+}
+
+.optionImage{
+    overflow: visible;
+}
+
+.activeOption{
+    background-color: var(--light-orange);
+}
+
+.tasksListWrapper{
+    padding: 40px 50px;
+    margin-top: 30px;
+    background: white;
+    border: 1px solid var(--light-gray);
+    border-radius: 10px;
+    color: var(--dark-gray);
+    font-size: 18px;
+}
+
+.tasksListWrapper h2, .tasksListWrapper h3{
+    color: black;
+    font-size: 20px;
+}
+
+.tasksListHeader{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    column-gap: 20px;
+    padding: 0 0 30px 0;
+}
+
+.searchBar{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border: 1px solid var(--light-gray);
+    border-radius: 10px;
+    padding: 15px;
+}
+
+.searchBar input{
+    border: none;
+}
+
+.searchBar input:focus{
+    outline: none;
+}
+
+.kanbanVue{
+    padding: 0!important;
+    background: none;
+    border: none;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    grid-auto-rows: 0.2fr;
+    gap: 20px;
+}
+
+.kanbanColumn {
+    background: white;
+    border-radius: 10px;
+    padding: 30px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.red{
+    border: 1px solid var(--light-red);
+}
+
+.yellow{
+    border: 1px solid var(--light-yellow);;
+}
+
+.green{
+    border: 1px solid var(--light-green);;
+}
+
+.kanbanColumnHeader {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.kanbanCount {
+    background: var(--light-gray);
+    border-radius: 20px;
+    padding: 5px 20px;
+    font-size: 14px;
+}
+
+@media (max-width: 1024px) {
+    .mainWrapper {
+        padding: 10px 5vw;
+    }
+
+    .mainWrapper h1 {
+        font-size: 20px;
+    }
+
+    .mainWrapper, .mainWrapper h3 {
+        font-size: 18px;
+    }
+
+    .mainWrapper p {
+        font-size: 16px;
+    }
+
+    .mainWrapper button {
+        font-size: 16px;
+    }
+}
+
+@media (max-width: 800px) {
+    .mainWrapper {
+        padding: 10px 5vw;
+    }
+
+    .mainWrapper h1 {
+        font-size: 20px;
+    }
+
+    .mainWrapper, .mainWrapper h3 {
+        font-size: 18px;
+    }
+
+    .mainWrapper p {
+        font-size: 16px;
+    }
+
+    .mainWrapper button {
+        font-size: 16px;
+    }
+
+    .tasksListWrapper{
+        padding: 20px 25px;
+    }
+
+    .tasksListWrapper h3{
+        margin: 10px 0;
+    }
+}
