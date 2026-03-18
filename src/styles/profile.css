@@ -22,12 +22,13 @@
 .form{
     display: flex;
     flex-direction: column;
+    align-items: flex-start;
     gap: 5px;
     font-size: 18px;
 }
 
 .form input{
-    padding: 20px;
+    padding: 15px 20px;
     border: 1px solid var(--light-gray);
     border-radius: 5px;
     margin-bottom: 15px;
@@ -37,6 +38,7 @@
 
 .form button{
     width: fit-content;
+    height: fit-content;
     color: white;
     font-size: 18px;
     background-color: black;

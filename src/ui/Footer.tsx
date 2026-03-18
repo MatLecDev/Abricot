@@ -10,8 +10,9 @@ export default function Footer() : JSX.Element{
                 alt="Logo noir"
                 width={150}
                 height={25}
+                tabIndex={0}
             />
-            <p>Abricot 2025-2026</p>
+            <p tabIndex={0}>Abricot 2025-2026</p>
         </footer>
     )
 }

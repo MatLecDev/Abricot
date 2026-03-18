@@ -40,6 +40,10 @@
     color: var(--green);
 }
 
+.taskDescription{
+    width: fit-content;
+}
+
 .taskContent{
     display: flex;
     justify-content: space-between;

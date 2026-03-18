@@ -59,8 +59,9 @@
 .updateIcon{
     border: 1px solid var(--light-gray);
     border-radius: 10px;
-    padding: 20px 15px;
+    padding: 15px;
     cursor: pointer;
+    background: none;
 }
 
 .dueDate{
@@ -75,7 +76,7 @@
     align-items: center;
 }
 
-.dueDate h4, .dueDate p{
+.projectTask h4, .dueDate p{
     font-size: 16px;
     font-weight: normal;
     margin: 0;

@@ -7,83 +7,87 @@ import Image from "next/image";
 import {useState} from "react";
 import "@/styles/projectTaskCard.css"
 
-export default function ProjectTaskCard({task, members, onEditAction}: {task: Task, members: ProjectMember[], onEditAction: (task: Task) => void}){
+/** Carte affichant les détails d'une tâche dans la vue projet */
+export default function ProjectTaskCard({task, members, onEditAction}: {
+    task: Task,
+    members: ProjectMember[],
+    onEditAction: (task: Task) => void
+}){
     const [displayComments, setDisplayComments] = useState<boolean>(false);
 
-    const handleDisplayComments = () => {
-        setDisplayComments(!displayComments);
-    }
-
     return(
-        <article className="projectTask">
+        <article className="projectTask" aria-label={`Tâche : ${task.title}`}>
             <div className="taskHeader">
                 <span className="taskTitle">
                     <h3>{task.title}</h3>
-                    <p className={"status " + (task.status)}>{convertStatus(task.status)}</p>
+                    <p className={"status " + task.status} aria-label={`Statut : ${convertStatus(task.status)}`}>
+                        {convertStatus(task.status)}
+                    </p>
                 </span>
-                <Image
-                    src="/icons/modify.svg"
-                    alt="update task icon"
-                    width={20}
-                    height={5}
+
+                {/* Bouton de modification de la tâche */}
+                <button
                     className="updateIcon"
                     onClick={() => onEditAction(task)}
-                />
+                    aria-label={`Modifier la tâche : ${task.title}`}
+                >
+                    <Image src="/icons/modify.svg" alt="" aria-hidden="true" width={20} height={5} />
+                </button>
             </div>
+
             <p>{task.description}</p>
+
+            {/* Date d'échéance */}
             <div className="dueDate">
                 <h4>Échéance : </h4>
                 <span>
-                    <Image
-                        src="/icons/date-black.svg"
-                        alt="Icone calendrier"
-                        width={20}
-                        height={20}
-                    />
-                    <p>{convertDate(task.dueDate)}</p>
+                    <Image src="/icons/date-black.svg" alt="" aria-hidden="true" width={20} height={20} />
+                    <p aria-label={`Date d'échéance : ${convertDate(task.dueDate)}`}>{convertDate(task.dueDate)}</p>
                 </span>
             </div>
-            <div className="taskContributors">
-                Assigné à :
-                {members.map((member: ProjectMember) => {
-                    return(
-                        <span className="contributor" key={member.id}>
-                            <p>{getInitials(member.user.name)}</p>
-                            <p>{member.user.name}</p>
-                        </span>
-                    )
-                })}
+
+            {/* Liste des membres assignés à la tâche */}
+            <div className="taskContributors" aria-label="Membres assignés">
+                <h4>Assigné à :</h4>
+                {members.map((member: ProjectMember) => (
+                    <span className="contributor" key={member.id} aria-label={member.user.name}>
+                        <p aria-hidden="true">{getInitials(member.user.name)}</p>
+                        <p>{member.user.name}</p>
+                    </span>
+                ))}
             </div>
+
+            {/* Section commentaires avec toggle d'affichage */}
             <div className="projectTasksComments">
                 <span className="commentsHeader">
-                    <p>Commentaires ({task.comments.length})</p>
+                    <p>{task.comments.length} commentaire(s)</p>
                     <button
-                        onClick={handleDisplayComments}
+                        onClick={() => setDisplayComments(prev => !prev)}
                         style={{ background: "none", border: "none", cursor: "pointer", padding: 0 }}
+                        aria-label={displayComments ? "Masquer les commentaires" : "Afficher les commentaires"}
+                        aria-expanded={displayComments}
                     >
                         <Image
                             src="/icons/chevron.svg"
-                            alt="icon chevron"
+                            alt=""
+                            aria-hidden="true"
                             width={20}
                             height={20}
                             className={displayComments ? "chevronDown" : "chevronUp"}
                         />
                     </button>
                 </span>
-                {displayComments && task.comments.map((comment) => {
-                    return(
-                        <div
-                            key={comment.id}
-                            className="commentWrapper"
-                        >
-                            <span className="commentHeader">
-                                <p>{comment.author.name}</p>
-                                <p>{convertDate(comment.createdAt)}</p>
-                            </span>
-                            <p>{comment.content}</p>
-                        </div>
-                    )
-                })}
+
+                {/* Liste des commentaires */}
+                {displayComments && task.comments.map((comment) => (
+                    <div key={comment.id} className="commentWrapper" aria-label={`Commentaire de ${comment.author.name}`}>
+                        <span className="commentHeader">
+                            <p>{comment.author.name}</p>
+                            <p aria-label={`Posté le ${convertDate(comment.createdAt)}`}>{convertDate(comment.createdAt)}</p>
+                        </span>
+                        <p>{comment.content}</p>
+                    </div>
+                ))}
             </div>
         </article>
     )

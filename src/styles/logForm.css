@@ -62,15 +62,18 @@
     border-radius: 15px;
 }
 
-.logFormWrapper span, .resetPassword{
+.switchFormBtn, .resetPassword{
     color: var(--main-orange);
     text-decoration: underline;
     text-underline-offset: 3px;
     cursor: pointer;
 }
 
-.logFormWrapper span{
+.switchFormBtn{
     margin-left: 5px;
+    background: none;
+    border: none;
+    font-size: 16px;
 }
 
 .backgroundImage {

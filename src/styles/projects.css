@@ -37,6 +37,10 @@
     gap: 20px;
 }
 
+.projectsGrid a{
+    text-decoration: none;
+}
+
 @media (max-width: 800px){
     .projectsHeader h1{
         font-size: 22px;

@@ -1,5 +1,5 @@
 "use client"
-import {type JSX, useEffect, useRef, useState} from "react"
+import { type JSX, useEffect, useRef, useState } from "react"
 import {Project, Task, User} from "@/types"
 import "@/styles/modale.css"
 import {useUserContext} from "@/context/UserContext";
@@ -13,24 +13,28 @@ interface ProjectModalProps {
     task?: Task
     user?: User
     project?: Project
-    onSuccess?: (project: Project) => void
     onDelete?: () => void
 }
 
-export default function TaskModale({ onClose, type, user, task, project, onSuccess, onDelete }: ProjectModalProps): JSX.Element {
+/** Modale de création, modification et suppression de tâche */
+export default function TaskModale({ onClose, type, user, task, project, onDelete }: ProjectModalProps): JSX.Element {
     const { loadUserData } = useUserContext()
-    const [title, setTitle] = useState<string>(type === "update" && task ? task!.title : "")
-    const [description, setDescription] = useState<string>(type === "update" && task ? task!.description : "")
-    const [date, setDate] = useState<string>(type === "update" && task ? toInputDate(task!.dueDate) : "")
-    const [status, setStatus] = useState<string>(type === "update" && task ? task!.status : "")
+
+    // Initialisation des champs avec les valeurs existantes en mode modification
+    const [title, setTitle] = useState<string>(type === "update" && task ? task.title : "")
+    const [description, setDescription] = useState<string>(type === "update" && task ? task.description : "")
+    const [date, setDate] = useState<string>(type === "update" && task ? toInputDate(task.dueDate) : "")
+    const [status, setStatus] = useState<string>(type === "update" && task ? task.status : "")
     const modalRef = useRef<HTMLDivElement>(null)
 
+    // Options de statut disponibles pour une tâche
     const statusOptions = [
         { value: "TODO", label: "À faire", className: "TODO" },
         { value: "IN_PROGRESS", label: "En cours", className: "IN_PROGRESS" },
         { value: "DONE", label: "Terminée", className: "DONE" },
     ]
 
+    // Focus trap + fermeture par Echap
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
             if (e.key === "Escape") {
@@ -39,7 +43,7 @@ export default function TaskModale({ onClose, type, user, task, project, onSucce
             }
             if (e.key === "Tab") {
                 const focusable = modalRef.current?.querySelectorAll<HTMLElement>(
-                    'button, input, [tabindex]:not([tabindex="-1"])'
+                    'button:not([disabled]), input, [tabindex]:not([tabindex="-1"])'
                 )
                 if (!focusable || focusable.length === 0) return
                 const first = focusable[0]
@@ -54,8 +58,8 @@ export default function TaskModale({ onClose, type, user, task, project, onSucce
             }
         }
         document.addEventListener("keydown", handleKeyDown)
+        // Focus initial sur le premier champ de saisie
         modalRef.current?.querySelector<HTMLElement>("input")?.focus()
-
         return () => document.removeEventListener("keydown", handleKeyDown)
     }, [onClose])
 
@@ -63,14 +67,14 @@ export default function TaskModale({ onClose, type, user, task, project, onSucce
         if (e.target === e.currentTarget) onClose()
     }
 
+    /** Crée ou met à jour la tâche selon le type de modale */
     const handleSubmit = async () => {
         if (!title.trim() || !description?.trim() || !date?.toString().trim() || !status?.trim()) return
         try {
             if (type === "add") {
-                await createTask(project!.id, title, description, date, status)
+                await createTask(project ? project.id : "", title, description, date, status)
             } else {
-                const updated = await updateTask(project!.id, task!.id, title, description, date, status)
-                onSuccess?.({ ...project!, ...updated })
+                await updateTask(project ? project.id : "", task ? task.id : "", title, description, date, status)
             }
             await loadUserData()
             onClose()
@@ -79,9 +83,10 @@ export default function TaskModale({ onClose, type, user, task, project, onSucce
         }
     }
 
+    /** Supprime définitivement la tâche */
     const handleDelete = async () => {
         try {
-            await deleteTask(project!.id, task!.id)
+            await deleteTask(project ? project.id : "", task ? task.id : "")
             await loadUserData()
             onClose()
             onDelete?.()
@@ -91,46 +96,78 @@ export default function TaskModale({ onClose, type, user, task, project, onSucce
     }
 
     const isValid = title.trim() !== "" && description?.trim() !== "" && date?.toString().trim() !== "" && status?.trim() !== ""
-    const canBeDeleted = task?.project?.ownerId === user?.id && type === "update";
+    const canBeDeleted = task?.project?.ownerId === user?.id && type === "update"
 
     return (
-        <dialog className="modalBackdrop" onClick={handleBackdropClick} role="dialog" aria-modal="true" aria-labelledby="modal-title">
+        <dialog
+            className="modalBackdrop"
+            onClick={handleBackdropClick}
+            aria-modal="true"
+            aria-labelledby="task-modal-title"
+        >
             <section className="modal" ref={modalRef}>
                 <button className="modalClose" onClick={onClose} aria-label="Fermer la modale">✕</button>
-                <h2 className="modalTitle">{type === "add" ? "Créer un projet" : "Modifier un projet"}</h2>
+                <h2 id="task-modal-title" className="modalTitle">
+                    {type === "add" ? "Créer une tâche" : "Modifier"}
+                </h2>
 
-                <form className="modalForm">
+                <form className="modalForm" aria-label={type === "add" ? "Formulaire de création de tâche" : "Formulaire de modification de tâche"}>
                     <label htmlFor="task-title">Titre*</label>
-                    <input id="task-title" type="text" value={title} onChange={e => setTitle(e.target.value)} />
+                    <input
+                        id="task-title"
+                        type="text"
+                        value={title}
+                        onChange={e => setTitle(e.target.value)}
+                        aria-required="true"
+                    />
 
                     <label htmlFor="task-description">Description*</label>
-                    <input id="task-description" type="text" value={description} onChange={e => setDescription(e.target.value)} />
+                    <input
+                        id="task-description"
+                        type="text"
+                        value={description}
+                        onChange={e => setDescription(e.target.value)}
+                        aria-required="true"
+                    />
 
                     <label htmlFor="task-date">Échéance*</label>
-                    <input id="task-date" type="date" value={date} onChange={e => setDate(e.target.value)} />
+                    <input
+                        id="task-date"
+                        type="date"
+                        value={date}
+                        onChange={e => setDate(e.target.value)}
+                        aria-required="true"
+                    />
 
-                    <label>Contributeurs</label>
-                    <button className="dropdownToggle" type="button">
-                        {project && (
-                            `${project!.members.length} contributeur(s) sélectionné(s)`
-                        ) || (
-                            "Choisir un ou plusieurs collaborateurs"
-                        )}
-                        <Image
-                            src="/icons/chevron.svg"
-                            alt="chevron icon"
-                            width={15}
-                            height={15}
-                        />
+                    {/* Sélecteur de contributeurs — fonctionnalité à implémenter */}
+                    <label id="task-contributors-label">Contributeurs</label>
+                    <button
+                        className="dropdownToggle"
+                        type="button"
+                        aria-labelledby="task-contributors-label"
+                        aria-haspopup="listbox"
+                    >
+                        {project
+                            ? `${project.members.length} contributeur(s) sélectionné(s)`
+                            : "Choisir un ou plusieurs collaborateurs"
+                        }
+                        <Image src="/icons/chevron.svg" alt="" aria-hidden="true" width={15} height={15} />
                     </button>
 
-                    <span className="statusSelector">
+                    {/* Sélecteur de statut sous forme de boutons visuels */}
+                    <span
+                        className="statusSelector"
+                        role="group"
+                        aria-label="Statut de la tâche"
+                    >
                         {statusOptions.map((option) => (
                             <button
                                 key={option.value}
                                 type="button"
                                 className={`statusOption ${option.className} ${status === option.value ? "statusOptionActive" : ""}`}
                                 onClick={() => setStatus(option.value)}
+                                aria-pressed={status === option.value}
+                                aria-label={`Statut : ${option.label}`}
                             >
                                 {option.label}
                             </button>
@@ -138,18 +175,25 @@ export default function TaskModale({ onClose, type, user, task, project, onSucce
                     </span>
 
                     <div className="modalSubmit">
-                        <button className={`modalSubmitBtn ${isValid ? "modalSubmitBtnActive" : ""}`} onClick={handleSubmit} disabled={!isValid}>
-                            {type === "add" ? "Ajouter un projet" : "Enregistrer"}
+                        <button
+                            className={`modalSubmitBtn ${isValid ? "modalSubmitBtnActive" : ""}`}
+                            onClick={handleSubmit}
+                            disabled={!isValid}
+                            aria-disabled={!isValid}
+                        >
+                            {type === "add" ? "Ajouter une tâche" : "Enregistrer"}
                         </button>
+
+                        {/* Bouton de suppression visible uniquement pour le propriétaire en mode modification */}
                         {canBeDeleted && (
-                            <Image
-                                src="/icons/delete.svg"
-                                alt="delete icon"
-                                width={50}
-                                height={50}
+                            <button
                                 className="deleteIcon"
                                 onClick={handleDelete}
-                            />
+                                aria-label={`Supprimer définitivement la tâche : ${task?.title}`}
+                                type="button"
+                            >
+                                <Image src="/icons/delete.svg" alt="" aria-hidden="true" width={50} height={50} />
+                            </button>
                         )}
                     </div>
                 </form>

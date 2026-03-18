@@ -3,10 +3,15 @@ import {Task} from "@/types"
 
 const BASE_URL = "http://localhost:8000"
 
+/** Structure de la réponse API pour une tâche unique */
 interface TaskResponse {
     task: Task
 }
 
+/**
+ * Fonction utilitaire pour effectuer des requêtes HTTP authentifiées.
+ * Gère les réponses vides (ex: DELETE) en retournant null.
+ */
 async function fetchWithAuth<T>(endpoint: string, method: string, body?: object): Promise<T | null> {
     const token = Cookies.get("token")
     const response = await fetch(`${BASE_URL}${endpoint}`, {
@@ -24,38 +29,37 @@ async function fetchWithAuth<T>(endpoint: string, method: string, body?: object)
     return text ? JSON.parse(text).data : null
 }
 
+/**
+ * Crée une nouvelle tâche dans un projet.
+ * Si aucune date n'est fournie, utilise la date actuelle par défaut.
+ */
 export async function createTask(projectId: string, name: string, description: string, dueDate?: string, status?: string): Promise<Task> {
-    let dueDateToISO;
-    if (dueDate) {
-        dueDateToISO = new Date(dueDate).toISOString()
-    }
-    else{
-        dueDateToISO = new Date()
-    }
+    // Conversion de la date en ISO 8601 attendu par l'API
+    const dueDateToISO = dueDate ? new Date(dueDate).toISOString() : new Date().toISOString()
 
     const response = await fetchWithAuth<Task>(`/projects/${projectId}/tasks`, "POST", {
         title: name,
-        description: description,
+        description,
         dueDate: dueDateToISO,
-        status: status
+        status
     })
-    if (!response) throw new Error("Erreur lors de la création du projet")
+    if (!response) throw new Error("Erreur lors de la création de la tâche")
     return response
 }
 
+/** Met à jour une tâche existante */
 export async function updateTask(projectId: string, taskId: string, name: string, description: string, dueDate: string, status: string): Promise<Task> {
     const response = await fetchWithAuth<TaskResponse>(`/projects/${projectId}/tasks/${taskId}`, "PUT", {
         title: name,
-        description: description,
+        description,
         dueDate: new Date(dueDate).toISOString(),
-        status: status
+        status
     })
-    if (!response) throw new Error("Erreur lors de la modification du projet")
+    if (!response) throw new Error("Erreur lors de la modification de la tâche")
     return response.task
 }
 
+/** Supprime définitivement une tâche */
 export async function deleteTask(projectId: string, taskId: string) {
-    const reponse = await fetchWithAuth(`/projects/${projectId}/tasks/${taskId}`, "DELETE")
-
-    return reponse;
+    return fetchWithAuth(`/projects/${projectId}/tasks/${taskId}`, "DELETE")
 }

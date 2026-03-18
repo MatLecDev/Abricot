@@ -1,5 +1,5 @@
 "use client"
-import {type JSX, useEffect, useRef, useState} from "react"
+import { type JSX, useEffect, useRef, useState } from "react"
 import {Project, User} from "@/types"
 import "@/styles/modale.css"
 import {createProject, deleteProject, updateProject} from "@/service/projectService";
@@ -11,17 +11,22 @@ interface ProjectModalProps {
     type: string
     user?: User
     project?: Project
-    onSuccess?: (project: Project) => void
     onDelete?: () => void
 }
 
-export default function ProjectModale({ onClose, type, user, project, onSuccess, onDelete }: ProjectModalProps): JSX.Element {
+/**
+ * Modale de création et modification de projet.
+ * Accessible uniquement au propriétaire du projet (vérifié avant le rendu).
+ */
+export default function ProjectModale({ onClose, type, user, project, onDelete }: ProjectModalProps): JSX.Element {
     const { loadUserData } = useUserContext()
+
+    // Initialisation des champs avec les valeurs existantes en mode modification
     const [title, setTitle] = useState<string>(type === "update" && project ? project.name : "")
     const [description, setDescription] = useState<string>(type === "update" && project ? project.description : "")
     const modalRef = useRef<HTMLDivElement>(null)
 
-
+    // Focus trap + fermeture par Echap
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
             if (e.key === "Escape") {
@@ -30,7 +35,7 @@ export default function ProjectModale({ onClose, type, user, project, onSuccess,
             }
             if (e.key === "Tab") {
                 const focusable = modalRef.current?.querySelectorAll<HTMLElement>(
-                    'button, input, [tabindex]:not([tabindex="-1"])'
+                    'button:not([disabled]), input, [tabindex]:not([tabindex="-1"])'
                 )
                 if (!focusable || focusable.length === 0) return
                 const first = focusable[0]
@@ -45,8 +50,8 @@ export default function ProjectModale({ onClose, type, user, project, onSuccess,
             }
         }
         document.addEventListener("keydown", handleKeyDown)
+        // Focus initial sur le premier champ de saisie
         modalRef.current?.querySelector<HTMLElement>("input")?.focus()
-
         return () => document.removeEventListener("keydown", handleKeyDown)
     }, [onClose])
 
@@ -54,14 +59,14 @@ export default function ProjectModale({ onClose, type, user, project, onSuccess,
         if (e.target === e.currentTarget) onClose()
     }
 
+    /** Crée ou met à jour le projet selon le type de modale */
     const handleSubmit = async () => {
         if (!title.trim() || !description.trim()) return
         try {
             if (type === "add") {
                 await createProject(title, description)
             } else {
-                const updated = await updateProject(project!.id, title, description)
-                onSuccess?.({ ...project!, ...updated })
+                await updateProject(project ? project.id : "", title, description)
             }
             await loadUserData()
             onClose()
@@ -70,9 +75,10 @@ export default function ProjectModale({ onClose, type, user, project, onSuccess,
         }
     }
 
+    /** Supprime définitivement le projet et redirige vers la liste */
     const handleDelete = async () => {
         try {
-            await deleteProject(project!.id)
+            await deleteProject(project ? project.id : "")
             await loadUserData()
             onClose()
             onDelete?.()
@@ -82,49 +88,78 @@ export default function ProjectModale({ onClose, type, user, project, onSuccess,
     }
 
     const isValid = title.trim() !== "" && description.trim() !== ""
-    const canBeDeleted = project?.ownerId === user?.id && type === "update";
+    const canBeDeleted = project?.ownerId === user?.id && type === "update"
+
+    // Sécurité : ne rend rien si l'utilisateur n'est pas le propriétaire
+    if (project?.ownerId !== user?.id) return <></>
 
     return (
-        <dialog className="modalBackdrop" onClick={handleBackdropClick} role="dialog" aria-modal="true" aria-labelledby="modal-title">
+        <dialog
+            className="modalBackdrop"
+            onClick={handleBackdropClick}
+            aria-modal="true"
+            aria-labelledby="modal-title"
+        >
             <section className="modal" ref={modalRef}>
                 <button className="modalClose" onClick={onClose} aria-label="Fermer la modale">✕</button>
-                <h2 className="modalTitle">{type === "add" ? "Créer un projet" : "Modifier un projet"}</h2>
+                <h2 id="modal-title" className="modalTitle">
+                    {type === "add" ? "Créer un projet" : "Modifier un projet"}
+                </h2>
 
-                <form className="modalForm">
+                <form className="modalForm" aria-label={type === "add" ? "Formulaire de création de projet" : "Formulaire de modification de projet"}>
                     <label htmlFor="project-title">Titre*</label>
-                    <input id="project-title" type="text" value={title} onChange={e => setTitle(e.target.value)} />
+                    <input
+                        id="project-title"
+                        type="text"
+                        value={title}
+                        onChange={e => setTitle(e.target.value)}
+                        aria-required="true"
+                    />
 
                     <label htmlFor="project-description">Description*</label>
-                    <input id="project-description" type="text" value={description} onChange={e => setDescription(e.target.value)} />
+                    <input
+                        id="project-description"
+                        type="text"
+                        value={description}
+                        onChange={e => setDescription(e.target.value)}
+                        aria-required="true"
+                    />
 
-                    <label>Contributeurs</label>
-                    <button className="dropdownToggle" type="button">
-                        {project && (
-                            `${project!.members.length} contributeur(s) sélectionné(s)`
-                        ) || (
-                            "Choisir un ou plusieurs collaborateurs"
-                        )}
-                        <Image
-                            src="/icons/chevron.svg"
-                            alt="chevron icon"
-                            width={15}
-                            height={15}
-                        />
+                    {/* Sélecteur de contributeurs — fonctionnalité à implémenter */}
+                    <label id="contributors-label">Contributeurs</label>
+                    <button
+                        className="dropdownToggle"
+                        type="button"
+                        aria-labelledby="contributors-label"
+                        aria-haspopup="listbox"
+                    >
+                        {project
+                            ? `${project.members.length} contributeur(s) sélectionné(s)`
+                            : "Choisir un ou plusieurs collaborateurs"
+                        }
+                        <Image src="/icons/chevron.svg" alt="" aria-hidden="true" width={15} height={15} />
                     </button>
 
                     <div className="modalSubmit">
-                        <button className={`modalSubmitBtn ${isValid ? "modalSubmitBtnActive" : ""}`} onClick={handleSubmit} disabled={!isValid}>
+                        <button
+                            className={`modalSubmitBtn ${isValid ? "modalSubmitBtnActive" : ""}`}
+                            onClick={handleSubmit}
+                            disabled={!isValid}
+                            aria-disabled={!isValid}
+                        >
                             {type === "add" ? "Ajouter un projet" : "Enregistrer"}
                         </button>
+
+                        {/* Bouton de suppression visible uniquement pour le propriétaire en mode modification */}
                         {canBeDeleted && (
-                            <Image
-                                src="/icons/delete.svg"
-                                alt="delete icon"
-                                width={50}
-                                height={50}
+                            <button
                                 className="deleteIcon"
                                 onClick={handleDelete}
-                            />
+                                aria-label={`Supprimer définitivement le projet : ${project?.name}`}
+                                type="button"
+                            >
+                                <Image src="/icons/delete.svg" alt="" aria-hidden="true" width={50} height={50} />
+                            </button>
                         )}
                     </div>
                 </form>

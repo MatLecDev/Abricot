@@ -97,7 +97,7 @@
     width: 40%;
 }
 
-.modalSubmitActiveBtn {
+.modalSubmitBtnActive {
     background-color: var(--main-orange);
     color: white;
     cursor: pointer;
@@ -125,6 +125,11 @@
 .statusOptionActive {
     opacity: 1;
     border: 1px solid;
+}
+
+.deleteIcon{
+    background: none;
+    border: none;
 }
 
 @media (max-width: 800px){
