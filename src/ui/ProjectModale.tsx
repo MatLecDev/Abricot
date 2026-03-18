@@ -1,10 +1,12 @@
 "use client"
-import { type JSX, useEffect, useRef, useState } from "react"
+import { type JSX, useRef, useState } from "react"
 import {Project, User} from "@/types"
 import "@/styles/modale.css"
 import {createProject, deleteProject, updateProject} from "@/service/projectService";
 import {useUserContext} from "@/context/UserContext";
 import Image from "next/image";
+import {useModalKeyboard} from "@/hooks/useModalKeyboard";
+import {createBackdropClickHandler} from "@/utils/modalUtils";
 
 interface ProjectModalProps {
     onClose: () => void
@@ -24,40 +26,14 @@ export default function ProjectModale({ onClose, type, user, project, onDelete }
     // Initialisation des champs avec les valeurs existantes en mode modification
     const [title, setTitle] = useState<string>(type === "update" && project ? project.name : "")
     const [description, setDescription] = useState<string>(type === "update" && project ? project.description : "")
+
     const modalRef = useRef<HTMLDivElement>(null)
 
-    // Focus trap + fermeture par Echap
-    useEffect(() => {
-        const handleKeyDown = (e: KeyboardEvent) => {
-            if (e.key === "Escape") {
-                onClose()
-                return
-            }
-            if (e.key === "Tab") {
-                const focusable = modalRef.current?.querySelectorAll<HTMLElement>(
-                    'button:not([disabled]), input, [tabindex]:not([tabindex="-1"])'
-                )
-                if (!focusable || focusable.length === 0) return
-                const first = focusable[0]
-                const last = focusable[focusable.length - 1]
-                if (e.shiftKey && document.activeElement === first) {
-                    e.preventDefault()
-                    last.focus()
-                } else if (!e.shiftKey && document.activeElement === last) {
-                    e.preventDefault()
-                    first.focus()
-                }
-            }
-        }
-        document.addEventListener("keydown", handleKeyDown)
-        // Focus initial sur le premier champ de saisie
-        modalRef.current?.querySelector<HTMLElement>("input")?.focus()
-        return () => document.removeEventListener("keydown", handleKeyDown)
-    }, [onClose])
+    // Focus trap + fermeture par Echap via le hook partagé
+    useModalKeyboard(modalRef, onClose)
 
-    const handleBackdropClick = (e: React.MouseEvent<HTMLDialogElement, MouseEvent>) => {
-        if (e.target === e.currentTarget) onClose()
-    }
+    // Fermeture au clic sur le backdrop via l'utilitaire partagé
+    const handleBackdropClick = createBackdropClickHandler(onClose)
 
     /** Crée ou met à jour le projet selon le type de modale */
     const handleSubmit = async () => {

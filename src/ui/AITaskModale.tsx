@@ -1,11 +1,13 @@
 "use client"
-import { type JSX, useEffect, useRef, useState } from "react"
+import { type JSX, useRef, useState } from "react"
 import { Project, Task } from "@/types"
 import { generateTasks } from "@/service/mistralService"
 import { createTask } from "@/service/taskService"
 import { useUserContext } from "@/context/UserContext"
 import "@/styles/aiTaskModale.css"
 import Image from "next/image";
+import {useModalKeyboard} from "@/hooks/useModalKeyboard";
+import {createBackdropClickHandler} from "@/utils/modalUtils";
 
 /** Structure d'une tâche proposée par l'IA */
 interface AITask {
@@ -41,36 +43,15 @@ export default function AITaskModale({ project, onClose }: AITaskModalProps): JS
 
     // Index de la tâche en cours d'édition (null si aucune)
     const [editingIndex, setEditingIndex] = useState<number | null>(null)
+
     const modalRef = useRef<HTMLDialogElement>(null)
 
-    // Focus trap + fermeture par Echap
-    useEffect(() => {
-        const handleModalKeyDown = (e: KeyboardEvent) => {
-            if (e.key === "Escape") {
-                onClose()
-                return
-            }
-            if (e.key === "Tab") {
-                const focusable = modalRef.current?.querySelectorAll<HTMLElement>(
-                    'section, button:not([disabled]), input, textarea, [tabindex]:not([tabindex="-1"])'
-                )
-                if (!focusable || focusable.length === 0) return
-                const first = focusable[0]
-                const last = focusable[focusable.length - 1]
-                if (e.shiftKey && document.activeElement === first) {
-                    e.preventDefault()
-                    last.focus()
-                } else if (!e.shiftKey && document.activeElement === last) {
-                    e.preventDefault()
-                    first.focus()
-                }
-            }
-        }
-        document.addEventListener("keydown", handleModalKeyDown)
-        // Focus initial sur le champ de saisie du prompt
-        modalRef.current?.querySelector<HTMLElement>("input")?.focus()
-        return () => document.removeEventListener("keydown", handleModalKeyDown)
-    }, [onClose])
+    // Focus trap + fermeture par Echap via le hook partagé
+    // Sélecteur étendu pour inclure les sections et textareas spécifiques à cette modale
+    useModalKeyboard(modalRef, onClose, 'section, button:not([disabled]), input, textarea, [tabindex]:not([tabindex="-1"])')
+
+    // Fermeture au clic sur le backdrop via l'utilitaire partagé
+    const handleBackdropClick = createBackdropClickHandler(onClose)
 
     // Titres des tâches existantes pour éviter les doublons dans les suggestions IA
     const existingTaskTitles = project.tasks?.map((t: Task) => t.title) ?? []
@@ -142,10 +123,6 @@ export default function AITaskModale({ project, onClose }: AITaskModalProps): JS
         } finally {
             setIsAdding(false)
         }
-    }
-
-    const handleBackdropClick = (e: React.MouseEvent<HTMLDialogElement>) => {
-        if (e.target === e.currentTarget) onClose()
     }
 
     return (
@@ -235,7 +212,9 @@ export default function AITaskModale({ project, onClose }: AITaskModalProps): JS
 
                 {/* Zone de saisie du prompt utilisateur */}
                 <section className="aiInputWrapper">
+                    <label htmlFor="ai-prompt" className="sr-only">Décrire les tâches à générer</label>
                     <input
+                        id="ai-prompt"
                         className="aiInput"
                         value={userMessage}
                         onChange={e => setUserMessage(e.target.value)}

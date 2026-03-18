@@ -1,32 +1,9 @@
-import Cookies from "js-cookie"
-import {Task} from "@/types"
-
-const BASE_URL = "http://localhost:8000"
+import { Task } from "@/types"
+import { fetchWithAuth } from "@/service/fetchWithAuth"
 
 /** Structure de la réponse API pour une tâche unique */
 interface TaskResponse {
     task: Task
-}
-
-/**
- * Fonction utilitaire pour effectuer des requêtes HTTP authentifiées.
- * Gère les réponses vides (ex: DELETE) en retournant null.
- */
-async function fetchWithAuth<T>(endpoint: string, method: string, body?: object): Promise<T | null> {
-    const token = Cookies.get("token")
-    const response = await fetch(`${BASE_URL}${endpoint}`, {
-        headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-        },
-        ...(body ? { body: JSON.stringify(body) } : {}),
-        method: method
-    })
-
-    if (!response.ok) throw new Error(`Erreur lors de la requête ${endpoint}`)
-
-    const text = await response.text()
-    return text ? JSON.parse(text).data : null
 }
 
 /**

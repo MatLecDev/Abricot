@@ -1,35 +1,9 @@
-import Cookies from "js-cookie"
 import { Project } from "@/types"
-
-const BASE_URL = "http://localhost:8000"
+import { fetchWithAuth } from "@/service/fetchWithAuth"
 
 /** Structure de la réponse API pour un projet unique */
 interface ProjectResponse {
     project: Project
-}
-
-/**
- * Fonction utilitaire pour effectuer des requêtes HTTP authentifiées.
- * Récupère le token JWT depuis les cookies et l'ajoute au header Authorization.
- * Gère les réponses vides (ex: DELETE) en retournant null.
- */
-async function fetchWithAuth<T>(endpoint: string, method: string, body?: object): Promise<T | null> {
-    const token = Cookies.get("token")
-    const response = await fetch(`${BASE_URL}${endpoint}`, {
-        headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-        },
-        // Body uniquement si fourni pour éviter d'envoyer un body vide sur les DELETE
-        ...(body ? { body: JSON.stringify(body) } : {}),
-        method: method
-    })
-
-    if (!response.ok) throw new Error(`Erreur lors de la requête ${endpoint}`)
-
-    // Gestion des réponses vides (ex: suppression)
-    const text = await response.text()
-    return text ? JSON.parse(text).data : null
 }
 
 /** Crée un nouveau projet */
